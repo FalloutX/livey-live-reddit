@@ -8,8 +8,7 @@ import morgan from 'morgan'
 import myRoutes from './routes/index'
 import config from './config'
 import User from './models/User'
-import authTwitter from './authTwitter'
-import bearerStrategy from './bearerStrategy'
+import authReddit from './authReddit'
 import jwtStrategy from './jwtStrategy'
 /**
  * configureApp - adds configuration and bootstraps express App.
@@ -39,7 +38,7 @@ function configureApp () {
     // store: new MongoStore({ mongooseConnection: mongoose.connection })
   }))
 
-  passport.use(authTwitter)
+  passport.use(authReddit)
   passport.use(jwtStrategy)
   passport.serializeUser((user, cb) => {
     cb(null, user._id)

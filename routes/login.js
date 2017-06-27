@@ -1,15 +1,10 @@
 import express from 'express'
 import config from '../config'
 import passport from 'passport'
+import crypto from 'crypto'
 
 const router = express.Router()
 
-
-router.get('/twitter',
-  passport.authenticate('twitter', {
-    session: false
-  })
-)
 
 router.get('/guess/user',
   passport.authenticate('jwt', { session: false }),
@@ -17,20 +12,25 @@ router.get('/guess/user',
     if (req.user) {
       res.json({info: 'successfully-booted-up', user: req.user, token: req.user.appToken})
     } else {
-      res.json({info: 'successfully-booted-up', login: 'http://127.0.0.1:3001/login/twitter'})
+      res.json({info: 'successfully-booted-up', login: 'http://127.0.0.1:3010/login/reddit'})
     }
   }
 )
 
-router.get('/twitter/return',
-  passport.authenticate('twitter', {
-    failureRedirect: '/login/twitter',
-    session: false
-  }),
-  (req, res) => {
-    // Redirect to frontend server with the access token in the request
-    res.redirect(`${config.frontend.server}user?jwt=${req.user.appToken}`)
-  })
+router.get('/reddit', function (req, res, next) {
+  req.session.state = crypto.randomBytes(32).toString('hex')
+  passport.authenticate('reddit', {
+    state: req.session.state,
+    duration: 'permanent'
+  })(req, res, next)
+})
 
+router.get('/reddit/callback',
+  passport.authenticate('reddit', {
+    failureRedirect: '/login/reddit'
+  })
+, (req, res) => {
+  res.redirect(`${config.frontend.server}user?jwt=${req.user.appToken}`)
+})
 
 export default router
